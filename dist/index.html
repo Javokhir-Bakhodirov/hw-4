@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Expense Tracker</title>
+        <link
+            href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css"
+            rel="stylesheet"
+            type="text/css" />
+        <link
+            rel="stylesheet"
+            href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+    <body class="bg-gray-900 text-gray-200 transition duration-300">
+        <div class="container p-10 mx-auto gap-10 flex flex-col">
+            <div
+                class="h-[450px] shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] p-10 rounded-3xl bg-gray-800">
+                <h1 class="text-4xl font-black text-green-400">
+                    Expense tracker
+                </h1>
+
+                <div class="w-full items-center mt-5 h-[300px] flex gap-5">
+                    <div
+                        class="max-w-[450px] w-full h-full shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] rounded-2xl flex items-center flex-col justify-center bg-gray-700">
+                        <h3 class="text-2xl">Income</h3>
+                        <strong id="incomeText" class="text-4xl mt-4"
+                            >0 UZS</strong
+                        >
+                        <button
+                            id="incomeBtn"
+                            class="bg-green-500 text-white py-3 px-6 rounded-3xl mt-4 hover:opacity-75 active:scale-95 duration-300">
+                            Add income
+                        </button>
+                    </div>
+                    <div
+                        class="max-w-[450px] w-full h-full shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] rounded-2xl flex items-center flex-col justify-center bg-gray-700">
+                        <h3 class="text-2xl">Expense</h3>
+                        <strong id="expenseText" class="text-4xl mt-4"
+                            >0 UZS</strong
+                        >
+                        <button
+                            id="expenseBtn"
+                            class="bg-red-500 text-white py-3 px-6 rounded-3xl mt-4 hover:opacity-75 active:scale-95 duration-300">
+                            Add expense
+                        </button>
+                    </div>
+                    <div
+                        id="transactions-bottom"
+                        class="flex-1 h-full shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] rounded-2xl bg-gray-700">
+                        <div
+                            class="flex-1 shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] rounded-3xl bg-gray-800 p-6">
+                            <h3 class="text-2xl mb-4">
+                                Income vs Expenses Chart
+                            </h3>
+                            <canvas
+                                id="balanceChart"
+                                class="w-full h-auto max-w-full max-h-full object-contain"
+                                width="400"
+                                height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                id="transactions-box"
+                class="shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] flex items-start justify-start gap-7 rounded-3xl bg-gray-800 p-6">
+                <div class="flex-1">
+                    <h3 class="text-2xl mb-4">Transaction List</h3>
+                    <ul id="transactionList" class="space-y-2"></ul>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-2xl mt-6">Top 5 Expense Categories</h3>
+                    <ul id="topCategories" class="space-y-2 mt-4"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div
+            id="overlay"
+            class="w-screen h-screen fixed top-0 left-0 bg-[rgba(255,255,255,0.1)] backdrop-blur-md hidden">
+            <div role="alert" class="alert alert-error hidden" id="alertError">
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 shrink-0 stroke-current"
+                    fill="none"
+                    viewBox="0 0 24 24">
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Error! Task failed successfully.</span>
+            </div>
+            <div
+                id="modal"
+                class="bg-gray-800 shadow-[0_0px_20px_0px_rgba(255,255,255,0.1)] rounded-2xl w-full max-w-[500px] absolute top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
+                <form id="transactionForm" class="flex flex-col p-6 gap-4">
+                    <div class="flex justify-between items-center mb-5">
+                        <h3 class="text-3xl font-bold">Create a transaction</h3>
+                        <button type="button" id="closeBtn">
+                            <i class="bi bi-x-circle text-2xl text-red-500"></i>
+                        </button>
+                    </div>
+                    <input
+                        class="border-2 border-gray-500 rounded-lg h-10 indent-3 bg-gray-700 text-white"
+                        type="text"
+                        placeholder="Enter transaction name" />
+                    <input
+                        class="border-2 border-gray-500 rounded-lg h-10 indent-3 bg-gray-700 text-white"
+                        type="number"
+                        placeholder="Enter transaction amount" />
+                    <select
+                        class="border-2 border-gray-500 rounded-lg h-10 indent-3 bg-gray-700 text-white">
+                        <option value="" disabled selected>
+                            Select transaction type
+                        </option>
+                        <option value="bills-utilities">
+                            Bills & Utilities
+                        </option>
+                        <option value="food">Food</option>
+                        <option value="personal">Personal</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="transport">Transport</option>
+                        <option value="investment">Investment</option>
+                        <option value="others">Others</option>
+                    </select>
+                    <button
+                        class="bg-green-500 text-white py-3 px-6 rounded-lg mt-4 hover:opacity-75 active:scale-95 duration-300">
+                        Create transaction
+                    </button>
+                </form>
+            </div>
+        </div>
+        <script src="./js/app.js"></script>
+    </body>
+</html>
